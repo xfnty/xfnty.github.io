@@ -4,6 +4,8 @@ from pathlib import Path
 from threading import Thread
 from datetime import datetime
 from argparse import ArgumentParser
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 from mistletoe import Document, HtmlRenderer, span_token
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 
@@ -18,14 +20,15 @@ except ImportError:
 
 
 source_dir   = Path(__file__).parent
-article_dir  = source_dir / 'articles'
-static_dir   = source_dir / 'static'
+content_dir  = source_dir / 'content'
+article_dir  = content_dir / 'articles'
+static_dir   = content_dir / 'static'
 build_dir    = source_dir / 'build'
 
 index_path       = build_dir / 'index.html'
-index_template_path   = source_dir / 'templates' / 'index.html'
-article_template_path = source_dir / 'templates' / 'article.html'
-article_link_template_path = source_dir / 'templates' / 'article-link.html'
+index_template_path   = content_dir / 'templates' / 'index.html'
+article_template_path = content_dir / 'templates' / 'article.html'
+article_link_template_path = content_dir / 'templates' / 'article-link.html'
 
 
 class MyHtmlRenderer(HtmlRenderer):
@@ -43,11 +46,16 @@ class MyHtmlRenderer(HtmlRenderer):
         target = 'mailto:{}'.format(token.target) if token.mailto else self.escape_url(token.target)
         return template.format(target=target, inner=self.render_inner(token))
 
+
 def create_request_handler(directory: Path):
     class handler(SimpleHTTPRequestHandler):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, directory=directory, **kwargs)
     return handler
+
+
+def info(*args, **kwargs):
+    print(f'[{datetime.now()}]:', *args, **kwargs)
 
 
 def error(*args, **kwargs):
@@ -84,6 +92,8 @@ def parse_article(url: str) -> (str, dict):
 
 
 def build():
+    info('Rendering website...')
+
     build_dir.mkdir(exist_ok=True)
     shutil.copytree(static_dir, build_dir, dirs_exist_ok=True)
 
@@ -104,17 +114,32 @@ def build():
     index_path.open('w').write(render(index_template_path.read_text(), {'articles': article_links}))
 
 
+class FileChangedEventHandler(FileSystemEventHandler):
+    def on_any_event(self, event):
+        if event.event_type in ['modified', 'deleted', 'moved']:
+            build()
+
+
 def serve():
     addr = ('127.0.0.1', 8000)
     server = ThreadingHTTPServer(addr, create_request_handler(str(build_dir)))
     server_thread = Thread(target=lambda s: s.serve_forever(), args=(server,))
     server_thread.start()
-    print(f'Running local web server on address http://{addr[0]}:{addr[1]}')
+
+    observer = Observer()
+    observer.schedule(FileChangedEventHandler(), content_dir, recursive=True)
+    observer.start()
+
+    info(f'Running local web server on address http://{addr[0]}:{addr[1]}')
     try:
-        input('Press ENTER or CTRL+C to exit\n')
+        input()
+        while observer.is_alive():
+            observer.join(1)
     except KeyboardInterrupt:
         pass
     finally:
+        observer.stop()
+        observer.join()
         server.shutdown()
         server_thread.join()
 

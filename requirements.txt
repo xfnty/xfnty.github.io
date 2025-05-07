@@ -1,1 +1,2 @@
 mistletoe==1.4.0
+watchdog==6.0.0
