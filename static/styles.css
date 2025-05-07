@@ -1,0 +1,99 @@
+:root {
+    --background-color: #fff;
+    --code-background-color: #eee;
+    --text-color: #000;
+    --font-scale: 125%;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background-color: #222;
+        --text-color: #fff;
+        --code-background-color: #333;
+    }
+    a {
+        color: skyblue;
+    }
+}
+
+main > *, header > * {
+    margin: 0 0 1rem 0;
+}
+
+body {
+    padding: 1rem;
+    max-width: 600px;
+    margin: 0 auto;
+    color: var(--text-color);
+    font-size: var(--font-scale);
+    background-color: var(--background-color);
+    overflow-y: scroll;
+}
+
+footer {
+    margin-top: 1rem;
+    text-align: center;
+}
+
+a {
+    text-decoration: none;
+}
+
+.img {
+    text-align: center;
+}
+
+img {
+    width: 100%;
+}
+
+code, pre {
+    background-color: var(--code-background-color);
+}
+
+code {
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.1rem;
+}
+
+pre {
+    padding: 1rem;
+    border-radius: 0.25rem;
+}
+
+#markdown {
+}
+
+a[class~="article-link"] {
+    display: flex;
+    flex-direction: row;
+    text-decoration: none;
+    gap: 1rem;
+    align-items: center;
+    color: var(--text-color);
+    margin-bottom: 1rem;
+}
+
+a[class~="article-link"] div {
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+a[class~="article-link"] title {
+    display: block;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+a[class~="article-link"] p {
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+a[class~="article-link"] time {
+    white-space: nowrap;
+}
