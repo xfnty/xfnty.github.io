@@ -101,7 +101,12 @@ def build():
     article_template = article_template_path.read_text()
     article_link_template = article_link_template_path.read_text()
     renderer = MyHtmlRenderer()
-    for i in map(lambda p: p.name, filter(Path.is_dir, article_dir.iterdir())):
+    article_ids = sorted(
+        map(lambda p: p.name, filter(Path.is_dir, article_dir.iterdir())),
+        key=lambda i: -datetime.strptime(parse_article(i)[0]['date'], '%b %d, %Y').timestamp()
+    )
+    for i in article_ids:
+        info(i)
         od = build_dir / i
         od.mkdir(exist_ok=True)
         for a in filter(lambda p: 'index.md' not in p.parts, (article_dir / i).iterdir()):
@@ -152,6 +157,7 @@ if __name__ == '__main__':
 
     if args.url:
         create_article(args.url)
+        quit()
 
     build()
 
