@@ -54,9 +54,8 @@ class MyHtmlRenderer(HtmlRenderer):
         return text
 
     def render_image(self, token: span_token.Image) -> str:
-        template = '<div class="img"><img src="{}" alt="{}"></img><small>{}</small></div>'
-        title = html.escape(token.title) if token.title else ''
-        return template.format(token.src, self.render_to_plain(token), title)
+        template = '<div class="img"><img src="{}"></img><small>{}</small></div>'
+        return template.format(token.src, self.render_inner(token))
 
     def render_link(self, token: span_token.Link) -> str:
         template = '<a target="_blank" href="{target}">{inner}</a>'

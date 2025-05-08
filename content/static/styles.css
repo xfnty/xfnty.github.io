@@ -52,7 +52,7 @@ code, pre {
     background-color: var(--code-background-color);
 }
 
-code {
+p code {
     padding: 0.2rem 0.4rem;
     border-radius: 0.1rem;
 }
