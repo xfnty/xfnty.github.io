@@ -3,17 +3,7 @@
     --code-background-color: #eee;
     --text-color: #000;
     --font-scale: 125%;
-}
-
-@media (prefers-color-scheme: dark) {
-    :root {
-        --background-color: #222;
-        --text-color: #fff;
-        --code-background-color: #333;
-    }
-    a {
-        color: skyblue;
-    }
+    --link-color: deepskyblue;
 }
 
 main > *, header > * {
@@ -35,8 +25,19 @@ footer {
     text-align: center;
 }
 
+h4, h5, h6 {
+    font-size: calc(1rem * var(--font-scale));
+}
+
 a {
     text-decoration: none;
+    color: var(--link-color);
+}
+a:active {
+    color: var(--link-color);
+}
+a:visited {
+    color: var(--link-color);
 }
 
 .img {
@@ -59,9 +60,6 @@ code {
 pre {
     padding: 1rem;
     border-radius: 0.25rem;
-}
-
-#markdown {
 }
 
 a[class~="article-link"] {
@@ -96,4 +94,12 @@ a[class~="article-link"] p {
 
 a[class~="article-link"] time {
     white-space: nowrap;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background-color: #222;
+        --text-color: #fff;
+        --code-background-color: #333;
+    }
 }

@@ -3,10 +3,13 @@ import shutil
 from pathlib import Path
 from threading import Thread
 from datetime import datetime
+from pygments import highlight
 from argparse import ArgumentParser
 from watchdog.observers import Observer
+from pygments.lexers import get_lexer_by_name
+from pygments.formatters import HtmlFormatter
 from watchdog.events import FileSystemEventHandler
-from mistletoe import Document, HtmlRenderer, span_token
+from mistletoe import Document, HtmlRenderer, span_token, block_token
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 
 try:
@@ -32,6 +35,24 @@ article_link_template_path = content_dir / 'templates' / 'article-link.html'
 
 
 class MyHtmlRenderer(HtmlRenderer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.pygments_formatter = HtmlFormatter(cssclass="code-highlight")
+        self.requires_pygments = False
+
+    def render_block_code(self, token: block_token.BlockCode) -> str:
+        inner = self.escape_html_text(token.content)
+        if token.language:
+            text = highlight(
+                inner,
+                get_lexer_by_name(html.escape(token.language), stripall=True),
+                self.pygments_formatter
+            )
+            self.requires_pygments = True
+        else:
+            text = '<pre><code>{inner}</code></pre>'.format(inner=inner)
+        return text
+
     def render_image(self, token: span_token.Image) -> str:
         template = '<div class="img"><img src="{}" alt="{}"></img><small>{}</small></div>'
         title = html.escape(token.title) if token.title else ''
@@ -92,8 +113,6 @@ def parse_article(url: str) -> (str, dict):
 
 
 def build():
-    info('Rendering website...')
-
     build_dir.mkdir(exist_ok=True)
     shutil.copytree(static_dir, build_dir, dirs_exist_ok=True)
 
@@ -106,7 +125,7 @@ def build():
         key=lambda i: -datetime.strptime(parse_article(i)[0]['date'], '%b %d, %Y').timestamp()
     )
     for i in article_ids:
-        info(i)
+        info(f'Rendering "{i}" ...')
         od = build_dir / i
         od.mkdir(exist_ok=True)
         for a in filter(lambda p: 'index.md' not in p.parts, (article_dir / i).iterdir()):
@@ -114,7 +133,11 @@ def build():
         attrs, text = parse_article(i)
         article_links += render(article_link_template, attrs)
         text = renderer.render(Document(text))
-        (od / 'index.html').open('w').write(render(article_template, attrs | {'content': text}))
+        ctx = attrs | {'content': text, 'styles': ''}
+        if renderer.requires_pygments:
+            ctx['styles'] = '<link rel="stylesheet" type="text/css" href="/pygments.css">'
+            renderer.requires_pygments = False
+        (od / 'index.html').open('w').write(render(article_template, ctx))
 
     index_path.open('w').write(render(index_template_path.read_text(), {'articles': article_links}))
 
