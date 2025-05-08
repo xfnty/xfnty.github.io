@@ -95,12 +95,12 @@ def create_article(url: str):
     i = d / 'index.md'
     now = datetime.now()
     dt = '{month} {day}, {year}'.format(month=now.strftime('%b'), day=now.day, year=now.year)
-    i.open('w').write(f"---\ntitle: Title\ndescription: Description\ndate: {dt}\n---\n\n")
+    i.open('w', errors='ignore').write(f"---\ntitle: Title\ndescription: Description\ndate: {dt}\n---\n\n")
 
 
 def parse_article(url: str) -> (str, dict):
     p = article_dir / url / 'index.md'
-    text = p.read_text()
+    text = p.read_text(errors='ignore')
     if not text.startswith('---\n') or text.count('---\n') < 2:
         error(f'{p.relative_to(source_dir)}: Markdown attribute list is required.')
     text = text.replace('---\n', '', 1)
@@ -116,8 +116,8 @@ def build():
     shutil.copytree(static_dir, build_dir, dirs_exist_ok=True)
 
     article_links = ''
-    article_template = article_template_path.read_text()
-    article_link_template = article_link_template_path.read_text()
+    article_template = article_template_path.read_text(errors='ignore')
+    article_link_template = article_link_template_path.read_text(errors='ignore')
     renderer = MyHtmlRenderer()
     article_ids = sorted(
         map(lambda p: p.name, filter(Path.is_dir, article_dir.iterdir())),
@@ -136,9 +136,11 @@ def build():
         if renderer.requires_pygments:
             ctx['styles'] = '<link rel="stylesheet" type="text/css" href="/pygments.css">'
             renderer.requires_pygments = False
-        (od / 'index.html').open('w').write(render(article_template, ctx))
+        (od / 'index.html').open('w', errors='ignore').write(render(article_template, ctx))
 
-    index_path.open('w').write(render(index_template_path.read_text(), {'articles': article_links}))
+    index_path.open('w', errors='ignore').write(
+        render(index_template_path.read_text(errors='ignore'), {'articles': article_links})
+    )
 
 
 class FileChangedEventHandler(FileSystemEventHandler):
