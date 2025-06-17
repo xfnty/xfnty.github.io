@@ -34,11 +34,37 @@ article_template_path = content_dir / 'templates' / 'article.html'
 article_link_template_path = content_dir / 'templates' / 'article-link.html'
 
 
+def info(*args, **kwargs):
+    print(f'[{datetime.now()}]:', *args, **kwargs)
+
+
+def error(*args, **kwargs):
+    print(COLOR_ERROR + 'error' + COLOR_RESET + ':', *args, **kwargs)
+
+
 class MyHtmlRenderer(HtmlRenderer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.pygments_formatter = HtmlFormatter(cssclass="code-highlight")
         self.requires_pygments = False
+        self.heading_counter = 0
+        self.headings = []
+
+    def get_index(self):
+        return ''
+        # if not self.headings:
+        #     return ''
+        # items = [f'<li><a href="#{i+1}">{h}</a></li>' for i, h in enumerate(self.headings)]
+        # return f'<details><summary>Contents</summary><ul>\n\t{"\n\t".join(items)}\n</ul></details>'
+
+    def render_heading(self, token: block_token.Heading) -> str:
+        if token.level != 1:
+            raise RuntimeError('Headings can only be level 1')
+        template = '<h1 id="{id}">{inner}</h1>'
+        heading = self.render_inner(token)
+        self.heading_counter += 1
+        self.headings.append(heading)
+        return template.format(id=self.heading_counter, inner=heading)
 
     def render_block_code(self, token: block_token.BlockCode) -> str:
         inner = self.escape_html_text(token.content)
@@ -74,15 +100,6 @@ def create_request_handler(directory: Path):
     return handler
 
 
-def info(*args, **kwargs):
-    print(f'[{datetime.now()}]:', *args, **kwargs)
-
-
-def error(*args, **kwargs):
-    print(COLOR_ERROR + 'error' + COLOR_RESET + ':', *args, **kwargs)
-    exit(1)
-
-
 def render(text: str, ctx: dict) -> str:
     for k, v in ctx.items():
         text = text.replace(f'{{{k}}}', v)
@@ -91,18 +108,22 @@ def render(text: str, ctx: dict) -> str:
 
 def create_article(url: str):
     d = article_dir / url
+    if d.exists():
+        error(f'"{url}" already exists.')
+        return
     d.mkdir()
     i = d / 'index.md'
     now = datetime.now()
     dt = '{month} {day}, {year}'.format(month=now.strftime('%b'), day=now.day, year=now.year)
     i.open('w', errors='ignore').write(f"---\ntitle: Title\ndescription: Description\ndate: {dt}\n---\n\n")
+    info(f'Created "{i.relative_to(content_dir)}"')
 
 
 def parse_article(url: str) -> (str, dict):
     p = article_dir / url / 'index.md'
     text = p.read_text(errors='ignore')
     if not text.startswith('---\n') or text.count('---\n') < 2:
-        error(f'{p.relative_to(source_dir)}: Markdown attribute list is required.')
+        raise RuntimeError(f'{p.relative_to(source_dir)}: Markdown attribute list is required.')
     text = text.replace('---\n', '', 1)
     attr_text = text[:text.index('---\n')].strip()
     text = text[text.index('---\n')+4:].strip()
@@ -118,25 +139,27 @@ def build():
     article_links = ''
     article_template = article_template_path.read_text(errors='ignore')
     article_link_template = article_link_template_path.read_text(errors='ignore')
-    renderer = MyHtmlRenderer()
     article_ids = sorted(
         map(lambda p: p.name, filter(Path.is_dir, article_dir.iterdir())),
         key=lambda i: -datetime.strptime(parse_article(i)[0]['date'], '%b %d, %Y').timestamp()
     )
     for i in article_ids:
         info(f'Rendering "{i}" ...')
-        od = build_dir / i
-        od.mkdir(exist_ok=True)
-        for a in filter(lambda p: 'index.md' not in p.parts, (article_dir / i).iterdir()):
-            shutil.copyfile(a, od / a.name)
-        attrs, text = parse_article(i)
-        article_links += render(article_link_template, attrs)
-        text = renderer.render(Document(text))
-        ctx = attrs | {'content': text, 'styles': ''}
-        if renderer.requires_pygments:
-            ctx['styles'] = '<link rel="stylesheet" type="text/css" href="/pygments.css">'
-            renderer.requires_pygments = False
-        (od / 'index.html').open('w', errors='ignore').write(render(article_template, ctx))
+        try:
+            od = build_dir / i
+            od.mkdir(exist_ok=True)
+            for a in filter(lambda p: 'index.md' not in p.parts, (article_dir / i).iterdir()):
+                shutil.copyfile(a, od / a.name)
+            attrs, text = parse_article(i)
+            article_links += render(article_link_template, attrs)
+            renderer = MyHtmlRenderer()
+            text = renderer.render(Document(text))
+            ctx = attrs | {'content': text, 'styles': '', 'index': renderer.get_index()}
+            if renderer.requires_pygments:
+                ctx['styles'] = '<link rel="stylesheet" type="text/css" href="/pygments.css">'
+            (od / 'index.html').open('w', errors='ignore').write(render(article_template, ctx))
+        except Exception as e:
+            error(str(e))
 
     index_path.open('w', errors='ignore').write(
         render(index_template_path.read_text(errors='ignore'), {'articles': article_links})

@@ -1,32 +1,53 @@
 :root {
-    --background-color: #fff;
+    --background-color: #fdfdfd;
     --code-background-color: #eee;
-    --text-color: #000;
-    --font-scale: 125%;
+    --highlight-background-color: rgba(255, 220, 100, 0.25);
+    --text-primary: #000;
+    --text-secondary: #888;
+    --font-size: 1.15rem;
+    --font: sans-serif;
     --link-color: deepskyblue;
 }
 
 main > *, header > * {
-    margin: 0 0 1rem 0;
+    margin: 0 0 0.5lh 0;
 }
 
 body {
     padding: 1rem;
     max-width: 600px;
     margin: 0 auto;
-    color: var(--text-color);
-    font-size: var(--font-scale);
+    color: var(--text-primary);
+    font-family: var(--font);
+    font-size: var(--font-size);
     background-color: var(--background-color);
     overflow-y: scroll;
 }
 
+header h1 {
+    margin: 0.5lh 0;
+}
+
 footer {
-    margin-top: 1rem;
+    margin-top: 1.5lh;
     text-align: center;
 }
 
-h4, h5, h6 {
-    font-size: calc(1rem * var(--font-scale));
+main {
+    margin-top: 1.5lh;
+}
+
+main h1 {
+    margin-top: 1.5lh;
+    font-size: 1.5rem;
+}
+
+ul, ol {
+    padding: 0 0 0 2rem;
+}
+
+ul li + li, ol li + li {
+    margin-top: 0.5lh;
 }
 
 a {
@@ -38,6 +59,20 @@ a:active {
 }
 a:visited {
     color: var(--link-color);
+}
+
+main h1:target {
+    animation: highlight-heading 2s;
+}
+
+@keyframes highlight-heading {
+    0% {
+        background-color: var(--highlight-background-color);
+    }
+
+    100% {
+        background-color: none;
+    }
 }
 
 .img {
@@ -60,6 +95,7 @@ p code {
 pre {
     padding: 1rem;
     border-radius: 0.25rem;
+    overflow-x: scroll;
 }
 
 a[class~="article-link"] {
@@ -68,7 +104,7 @@ a[class~="article-link"] {
     text-decoration: none;
     gap: 1rem;
     align-items: center;
-    color: var(--text-color);
+    color: var(--text-primary);
     margin-bottom: 1rem;
 }
 
@@ -79,13 +115,13 @@ a[class~="article-link"] div {
 
 a[class~="article-link"] title {
     display: block;
-    font-weight: bold;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 a[class~="article-link"] p {
+    color: var(--text-secondary);
     margin: 0;
     white-space: nowrap;
     overflow: hidden;
@@ -99,7 +135,8 @@ a[class~="article-link"] time {
 @media (prefers-color-scheme: dark) {
     :root {
         --background-color: #222;
-        --text-color: #fff;
+        --text-primary: #fff;
+        --text-secondary: #999;
         --code-background-color: #333;
     }
 }
