@@ -94,4 +94,13 @@ I thought about using `stb_sprintf` instead of one from standard library but ins
 in about 100 LoC. I didn't think it could be that simple. From this point I'll try to use as few
 external libraries as possible.
 
+I think one problematic part of this project is my intent to implement UI using
+Windows Controls that have (as I see it) quite bizarre API. I'll try to abstract it as much as I 
+can. Another part is outputting sound. Libretro cores use push model for providing audio samples to 
+the host application. I don't know yet which interface I will use: DirectSound or WASAPI, as I don't
+have any experience using audio APIs.
+
+For now I'll experiment with file dialogs, implement basic core loader and begin tinkering with 
+Controls library.
+
 [article]: https://nullprogram.com/blog/2023/02/15/
