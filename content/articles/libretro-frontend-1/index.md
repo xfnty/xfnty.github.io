@@ -143,3 +143,63 @@ Doing this sped up the build time from **0.9** seconds to **0.47** and also allo
 that wall of defines in the build file. I haven't tried to use different linker so there might be 
 room for improvement. Later I'll try to remove dependency on `vcruntime140.dll` which only exports 
 `memset`. I think I can just use `RtlFillMemory` or steal implementation from SDL.
+
+# Spinning Wheels, Crashing MSVC and Finishing with UI Controls
+
+Since the time a wrote the previous section I've made a few small changes to the project.
+
+First, I made module interfaces more object-oriented to stop using global varialbes and potentially
+make dependencies between them more explicit.
+
+Second, I figured out how to use Windows Controls to make a basic menu and status bars. It turned
+out to be surprisingly easy.
+
+![The interface for the MVP is mostly finished at this point.](4.webp)
+
+All of this still took too much time because I tried to rewrite my build script twice. First time to
+support incremental builds (using batch file, yes) and second – to add support for 2 more compilers
+(TCC and GCC). I can't say that doing both of these things is not possible but it certainly is not
+worth the trouble.
+
+I've also accidentally managed to crash MSVC. It was a little bit disappointing.
+
+<details>
+<summary>Here's the code that caused the crash.</summary>
+
+```c
+/*
+    cl.exe /Wall /c src.c
+
+    src.c
+    src.c(14): warning C4820: 'B': '12' bytes padding added after data member 'a'
+    src.c(19): fatal error C1001: Internal compiler error.
+    (compiler file 'msc1.cpp', line 1589)
+     To work around this problem, try simplifying or changing the program near the locations listed above.
+    If possible please provide a repro here: https://developercommunity.visualstudio.com
+    Please choose the Technical Support command on the Visual C++
+     Help menu, or open the Technical Support help file for more information
+    INTERNAL COMPILER ERROR in 'C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\cl.exe'
+        Please choose the Technical Support command on the Visual C++
+        Help menu, or open the Technical Support help file for more information
+*/
+
+typedef struct A A; // <-- "struct"
+enum A {            // <-- "enum"
+    _FLAG,          // no warnings, no errors
+};
+
+typedef struct B B;
+struct B {
+    A a;
+};
+
+B *f(A a)
+{
+    return &(B){ .a = a };
+}
+```
+
+</details>
+
+Of course I might be doing something wrong here, but it should be pointed out by the compiler in a 
+well-formatted error message, not a crash report.
