@@ -67,7 +67,7 @@ class MyHtmlRenderer(HtmlRenderer):
         return template.format(id=self.heading_counter, inner=heading)
 
     def render_block_code(self, token: block_token.BlockCode) -> str:
-        inner = self.escape_html_text(token.content)
+        inner = token.content
         if token.language:
             text = highlight(
                 inner,

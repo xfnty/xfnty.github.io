@@ -98,6 +98,10 @@ pre {
     overflow-x: scroll;
 }
 
+summary {
+    cursor: pointer;
+}
+
 a[class~="article-link"] {
     display: flex;
     flex-direction: row;
