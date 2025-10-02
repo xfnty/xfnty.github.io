@@ -118,7 +118,7 @@ def create_article(url: str):
     now = datetime.now()
     dt = '{month} {day}, {year}'.format(month=now.strftime('%b'), day=now.day, year=now.year)
     i.open('w', errors='ignore').write(
-        f"---\ntitle: Title\ndescription: Description\ndate: {dt}\n---\nlang: 'en'\n\n"
+        f"---\ntitle: Title\ndescription: \ndate: {dt}\n---\n\n"
     )
     info(f'Created "{i.relative_to(content_dir)}"')
 
@@ -131,9 +131,9 @@ def parse_article(url: str) -> (str, dict):
     text = text.replace('---\n', '', 1)
     attr_text = text[:text.index('---\n')].strip()
     text = text[text.index('---\n')+4:].strip()
-    pairs = (list(map(str.strip, l.split(': '))) for l in attr_text.split('\n'))
+    pairs = (list(map(str.strip, l.split(':'))) for l in attr_text.split('\n'))
     attrs = {e[0]: e[1] for e in pairs}
-    return attrs | {'url': f'/{url}', 'name': url}, text
+    return {'description': ''} | attrs | {'url': f'/{url}', 'name': url}, text
 
 
 def build():

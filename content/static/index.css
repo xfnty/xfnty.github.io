@@ -6,6 +6,11 @@ a[class~="article-link"] {
     align-items: center;
     color: var(--text-primary);
     margin-bottom: 1rem;
+    --text-decoration: none;
+}
+
+a[class~="article-link"]:hover {
+    --text-decoration: underline;
 }
 
 a[class~="article-link"] div {
@@ -18,6 +23,7 @@ a[class~="article-link"] title {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-decoration: var(--text-decoration);
 }
 
 a[class~="article-link"] p {
@@ -26,8 +32,11 @@ a[class~="article-link"] p {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-decoration: none;
 }
 
 a[class~="article-link"] time {
+    color: var(--text-secondary);
     white-space: nowrap;
+    text-decoration: none;
 }
