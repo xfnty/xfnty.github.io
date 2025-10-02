@@ -1,0 +1,33 @@
+a[class~="article-link"] {
+    display: flex;
+    flex-direction: row;
+    text-decoration: none;
+    gap: 1rem;
+    align-items: center;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+a[class~="article-link"] div {
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+a[class~="article-link"] title {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+a[class~="article-link"] p {
+    color: var(--text-secondary);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+a[class~="article-link"] time {
+    white-space: nowrap;
+}

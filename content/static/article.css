@@ -1,0 +1,19 @@
+h1 {
+    font-size: 1.5rem;
+}
+
+main * + h1 {
+    margin-top: 1lh;
+}
+
+ul, ol {
+    padding: 0 0 0 2rem;
+}
+
+ul li + li, ol li + li {
+    margin-top: 0;
+}
+
+img {
+    width: 100%;
+}

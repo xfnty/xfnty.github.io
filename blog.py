@@ -1,5 +1,6 @@
 import html
 import shutil
+from PIL import Image
 from pathlib import Path
 from threading import Thread
 from datetime import datetime
@@ -21,6 +22,7 @@ except ImportError:
     COLOR_RESET = ''
     COLOR_ERROR = ''
 
+image_extensions = [e for e, h in Image.registered_extensions().items() if h in Image.OPEN]
 
 source_dir   = Path(__file__).parent
 content_dir  = source_dir / 'content'
@@ -81,7 +83,7 @@ class MyHtmlRenderer(HtmlRenderer):
 
     def render_image(self, token: span_token.Image) -> str:
         template = '<div class="img"><img src="{}"></img><small>{}</small></div>'
-        return template.format(token.src, self.render_inner(token))
+        return template.format(Path(token.src).with_suffix('.webp'), self.render_inner(token))
 
     def render_link(self, token: span_token.Link) -> str:
         template = '<a target="_blank" href="{target}">{inner}</a>'
@@ -115,7 +117,9 @@ def create_article(url: str):
     i = d / 'index.md'
     now = datetime.now()
     dt = '{month} {day}, {year}'.format(month=now.strftime('%b'), day=now.day, year=now.year)
-    i.open('w', errors='ignore').write(f"---\ntitle: Title\ndescription: Description\ndate: {dt}\n---\n\n")
+    i.open('w', errors='ignore').write(
+        f"---\ntitle: Title\ndescription: Description\ndate: {dt}\n---\nlang: 'en'\n\n"
+    )
     info(f'Created "{i.relative_to(content_dir)}"')
 
 
@@ -149,14 +153,17 @@ def build():
             od = build_dir / i
             od.mkdir(exist_ok=True)
             for a in filter(lambda p: 'index.md' not in p.parts, (article_dir / i).iterdir()):
-                shutil.copyfile(a, od / a.name)
+                if a.suffix in image_extensions:
+                    Image.open(str(a)).save((od / a.name).with_suffix('.webp'))
+                else:
+                    shutil.copyfile(a, od / a.name)
             attrs, text = parse_article(i)
             article_links += render(article_link_template, attrs)
             renderer = MyHtmlRenderer()
             text = renderer.render(Document(text))
-            ctx = attrs | {'content': text, 'styles': '', 'index': renderer.get_index()}
+            ctx = attrs | {'content': text, 'pygments': '', 'index': renderer.get_index()}
             if renderer.requires_pygments:
-                ctx['styles'] = '<link rel="stylesheet" type="text/css" href="/pygments.css">'
+                ctx['pygments'] = '<link rel="stylesheet" type="text/css" href="/pygments.css">'
             (od / 'index.html').open('w', errors='ignore').write(render(article_template, ctx))
         except Exception as e:
             error(str(e))
