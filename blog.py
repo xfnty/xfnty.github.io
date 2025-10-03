@@ -78,7 +78,7 @@ class MyHtmlRenderer(HtmlRenderer):
             )
             self.requires_pygments = True
         else:
-            text = '<pre><code>{inner}</code></pre>'.format(inner=inner)
+            text = '<pre class="code-highlight"><code>{inner}</code></pre>'.format(inner=inner)
         return text
 
     def render_image(self, token: span_token.Image) -> str:

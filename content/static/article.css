@@ -17,3 +17,32 @@ ul li + li, ol li + li {
 img {
     width: 100%;
 }
+
+small {
+    display: block;
+    text-align: center;
+}
+
+pre {
+    padding: 10px;
+    overflow-x: scroll;
+    --scrollbar-color: transparent;
+}
+
+pre:hover {
+    --scrollbar-color: var(--text-secondary);
+}
+
+pre::-webkit-scrollbar {
+    background-color: transparent;
+    height: 7px;
+}
+
+pre::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-color);
+    cursor: pointer;
+}
+
+summary {
+    cursor: pointer;
+}
