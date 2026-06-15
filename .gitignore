@@ -1,7 +1,4 @@
-# Files
-*.ignore
-
-# Folders
-*.ignore/
-build/
-__pycache__/
+/public/
+*.exe
+ignore.*
+.hugo_build.lock

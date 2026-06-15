@@ -3,11 +3,9 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" href="/main.css">
-    <link rel="stylesheet" type="text/css" href="/article.css">
-    {pygments}
+    <link rel="stylesheet" type="text/css" href="/styles.css">
     <link rel="icon" href="/favicon.jpg" type="image/jpeg" />
-    <title>{title} | xfnty's blog</title>
+    <title>{{ .Title }} | xfnty's blog</title>
 </head>
 <body>
     <header>
@@ -17,7 +15,7 @@
     </header>
 
     <main id="markdown">
-        {content}
+        {{ .Content }}
     </main>
 
     <footer>
