@@ -19,6 +19,8 @@ body {
     font-size: var(--font-size);
     background-color: var(--background-color);
     overflow-y: scroll;
+    line-height: 1.3lh;
+    letter-spacing: 0.015rem;
 }
 
 body > * {
@@ -51,12 +53,9 @@ a[class~="article-link"] {
     flex-direction: row;
     text-decoration: none;
     gap: 1rem;
-    align-items: center;
+    align-items: flex-start;
     color: var(--text-primary);
     margin-bottom: 1rem;
-}
-
-a[class~="article-link"]:hover {
 }
 
 a[class~="article-link"] div {
@@ -78,9 +77,9 @@ a[class~="article-link"] h1 {
 a[class~="article-link"] p {
     color: var(--text-secondary);
     margin: 0;
-    white-space: nowrap;
+    /*white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
+    text-overflow: ellipsis;*/
     text-decoration: none;
 }
 
@@ -115,4 +114,25 @@ main pre {
 
 main img {
     width: 100%;
+}
+
+code {
+    color: #bbb;
+}
+
+pre code {
+    color: white;
+}
+
+hr {
+    border: none;
+    text-align: center;
+    transform: translateY(0.3rem);
+}
+
+hr::after {
+    content: "***";
+    color: gray;
+    font-size: 1.5rem;
+    letter-spacing: 0.25rem;
 }

@@ -1,0 +1,9 @@
+{{- $lang := .Type -}}
+{{- if transform.CanHighlight $lang -}}
+    {{ $result := transform.HighlightCodeBlock . }}
+    {{ $result.Wrapped }}
+{{- else -}}
+    {{- $opts := dict "type" "text" -}}
+    {{ $result := transform.HighlightCodeBlock . $opts }}
+    {{ $result.Wrapped }}
+{{- end -}}

@@ -2,3 +2,6 @@ baseURL = 'https://xfnty.github.io/'
 locale = 'en-us'
 title = "xfnty's blog"
 disableKinds = ["taxonomy", "term", "section"]
+[markup]
+  [markup.highlight]
+    style = "ashen"
