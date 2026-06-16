@@ -35,7 +35,7 @@ ring_pop(ints);
 
 I needed it to be pretty simple and being able to work inside fixed memory block.
 
-The template format fits the first condition pretty well and the second can be satisfied by having an additional `push_noalloc()` method. Also there is no need for adding or popping more than one element at a time.
+The template format fits the first condition pretty well and the second can be satisfied by having `push_noalloc()`. Also there is no need for adding or popping more than one element at a time.
 
 This is the complete interface:
 ```c
@@ -48,4 +48,12 @@ This is the complete interface:
 #define ring_free(_r)
 ```
 
-`ring_init()` zeros out the fields, `free()` and `push()` use `realloc()` and `free()`. `push_no_alloc()` may panic on buffer overflow.
+`ring_init()` zeros out the fields, `free()` and `push()` use `realloc()` and `free()`. `push_no_alloc()` panics on buffer overflow. I think it's OK if the grow factor will be a power of 2.
+
+Pushing an element to the queue means doing the following:
+- expanding the underlying buffer if necessary
+  - reallocating `data`
+  - moving `data[tail:allocated - tail]` to the end of the block if `tail + size > allocated`
+  - setting `allocated` to `allocated << 1 + 1`
+- updating `data[(tail + size) & (allocated - 1)]` element
+- incrementing `size`
