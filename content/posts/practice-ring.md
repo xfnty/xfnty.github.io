@@ -5,13 +5,16 @@ date = '2026-06-15T21:10:10+04:00'
 draft = true
 +++
 
-I must admit I'm pretty bad at programming. I have a habit of wasting a lot of time and jumping straight into code before doing any design.
+I must admit I'm pretty bad at programming. I have a habit of wasting a lot of time and jumping straight into
+code before doing any design.
 
-In this series of short posts I'd like to work on my shortcomings by making tiny projects while focusing on being more precise and efficient. 
+In this series of short posts I'd like to work on my shortcomings by making tiny projects while focusing on
+being more precise and efficient.
 
 ---
 
-One thing I had a struggle with recently was ring queue. It's purpose was to allow me to not use callbacks for window messages in a small game library I was writing at the time. I wanted it to be a C "template" type:
+One thing I had a struggle with recently was ring queue. It's purpose was to allow me to not use callbacks
+for window messages in a small game library I was writing at the time. I wanted it to be a C "template" type:
 
 ```c
 #define ring_t(_T) struct { _T *data; size_t n, m, tail; }
@@ -35,7 +38,8 @@ ring_pop(ints);
 
 I needed it to be pretty simple and being able to work inside fixed memory block.
 
-The template format fits the first condition pretty well and the second can be satisfied by having `push_noalloc()`. Also there is no need for adding or popping more than one element at a time.
+The template format fits the first condition pretty well and the second can be satisfied by having
+`push_noalloc()`. Also there is no need for adding or popping more than one element at a time.
 
 This is the complete interface:
 ```c
@@ -48,12 +52,47 @@ This is the complete interface:
 #define ring_free(_r)
 ```
 
-`ring_init()` zeros out the fields, `free()` and `push()` use `realloc()` and `free()`. `push_no_alloc()` panics on buffer overflow. I think it's OK if the grow factor will be a power of 2.
-
 Pushing an element to the queue means doing the following:
 - expanding the underlying buffer if necessary
   - reallocating `data`
   - moving `data[tail:allocated - tail]` to the end of the block if `tail + size > allocated`
   - setting `allocated` to `allocated << 1 + 1`
-- updating `data[(tail + size) & (allocated - 1)]` element
+- updating `data[(tail + size) % allocated]` element
 - incrementing `size`
+
+This is what I ended up with:
+```c
+#include <string.h>
+
+#ifndef RING_REALLOC
+    #define RING_REALLOC(_p, _s) realloc((_p), (_s))
+#endif
+
+#ifndef RING_FREE
+    #define RING_FREE(_p) free(_p)
+#endif
+
+#define ring_t(_T) struct { _T *data; size_t allocated, size, tail; }
+#define ring_init(_r) do { (_r).data = 0; (_r).allocated = (_r).size = (_r).tail = 0; } while (0)
+#define ring_get(_r) ((_r).data[(_r).tail])
+#define ring_pop(_r) do { (_r).size--; (_r).tail = ((_r).tail + 1) % (_r).allocated; } while (0)
+#define ring_free(_r) do { free((_r).data); ring_init(_r); } while (0)
+#define ring_push_noalloc(_r, _v) do { \
+        (_r).data[((_r).tail + (_r).size) % (_r).allocated] = (_v); \
+        (_r).size++; \
+    } while (0);
+#define ring_push(_r, _v) do { \
+        if ((_r).size + 1 > (_r).allocated) { \
+            (_r).data = realloc((_r).data, sizeof(*(_r).data) * (((_r).allocated << 1) + 1)); \
+            if ((_r).tail + (_r).size > (_r).allocated) { \
+                memmove( \
+                    (_r).data + (((_r).allocated << 1) + 1 - ((_r).allocated - (_r).tail)), \
+                    (_r).data + (_r).tail, \
+                    sizeof(*(_r).data) * ((_r).allocated - (_r).tail) \
+                ); \
+            } \
+            (_r).allocated = ((_r).allocated << 1) + 1; \
+        } \
+        ring_push_noalloc((_r), (_v)); \
+    } while (0)
+```
