@@ -2,7 +2,6 @@
 title = 'Practicing Programming #1: Ring Queue in C'
 description = 'Notes on trying to implement different things and learning to be intentional and efficient.'
 date = '2026-06-15T21:10:10+04:00'
-draft = true
 +++
 
 I must admit I'm pretty bad at programming. I have a habit of wasting a lot of time and jumping straight into
