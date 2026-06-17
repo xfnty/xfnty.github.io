@@ -62,10 +62,6 @@ Pushing an element to the queue means doing the following:
 
 This is what I ended up with:
 ```c
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-
 #ifndef RING_REALLOC
     #include <stdlib.h>
     #define _RING_STDLIB_INCLUDED
