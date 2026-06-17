@@ -35,10 +35,10 @@ int one = ring_get(ints);
 ring_pop(ints);
 ```
 
-I needed it to be pretty simple and being able to work inside fixed memory block.
+I needed it to be pretty simple and able to work inside fixed memory block as well as the heap.
 
-The template format fits the first condition pretty well and the second can be satisfied by having
-`push_noalloc()`. Also there is no need for adding or popping more than one element at a time.
+The template format fits the first condition pretty well and the second can be satisfied by adding
+`push_noalloc()`. Also there wasn't a need for adding or popping more than one element at a time or for it to be thread-safe.
 
 This is the complete interface:
 ```c
@@ -46,16 +46,16 @@ This is the complete interface:
 #define ring_init(_r)
 #define ring_push(_r, _v)
 #define ring_push_noalloc(_r, _v)
-#define ring_get(_r)
+#define ring_peek(_r)
 #define ring_pop(_r)
 #define ring_free(_r)
 ```
 
 Pushing an element to the queue means doing the following:
-- expanding the underlying buffer if necessary
-  - reallocating `data`
-  - moving `data[tail:allocated - tail]` to the end of the block if `tail + size > allocated`
-  - setting `allocated` to `allocated << 1 + 1`
+- expanding the underlying buffer if `size + 1 > allocated`
+  - expanding `data` to `(allocated << 1) + 1`
+  - moving `data[tail:allocated - tail]` to the end of the block and updating `tail` if `tail + size > allocated`
+  - updating `allocated`
 - updating `data[(tail + size) % allocated]` element
 - incrementing `size`
 
@@ -105,6 +105,8 @@ This is what I ended up with:
     } while (0)
 ```
 
-One thing I should take as a lesson is to write down the algorithm, make a checklist even if it feels trivial or dumb. Especially when I get stuck on a bug that happens randomly.
+At some point I forgot to set `tail` after `memmove` which resulted in `peek()` *sometimes* returning garbage. I spend too much time on this issue when I simply had to write down the algorithm and compare it to what I've already wrote.
+
+So one thing I should certainly take as a lesson is to make a checklist (steps of the algorithm) even if it feels trivial or dumb. Especially when I get stuck on a bug that happens randomly.
 
 And test, always test. Ideally with a reference implementation.
