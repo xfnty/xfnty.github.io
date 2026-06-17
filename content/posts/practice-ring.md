@@ -105,6 +105,6 @@ This is what I ended up with:
     } while (0)
 ```
 
-One thing I should take as a lesson is to write down the algorithm when I get even if it feels trivial or dumb. Especially when I get stuck on a bug that happens randomly.
+One thing I should take as a lesson is to write down the algorithm, make a checklist even if it feels trivial or dumb. Especially when I get stuck on a bug that happens randomly.
 
-And test, always test. Better with a reference implementation.
+And test, always test. Ideally with a reference implementation.
