@@ -106,3 +106,5 @@ This is what I ended up with:
 ```
 
 One thing I should take as a lesson is to write down the algorithm when I get even if it feels trivial or dumb. Especially when I get stuck on a bug that happens randomly.
+
+And test, always test. Better with a reference implementation.
