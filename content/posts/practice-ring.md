@@ -62,37 +62,52 @@ Pushing an element to the queue means doing the following:
 
 This is what I ended up with:
 ```c
+#include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 #ifndef RING_REALLOC
+    #include <stdlib.h>
+    #define _RING_STDLIB_INCLUDED
     #define RING_REALLOC(_p, _s) realloc((_p), (_s))
 #endif
 
 #ifndef RING_FREE
+    #ifndef _RING_STDLIB_INCLUDED
+        #include <stdlib.h>
+    #endif
     #define RING_FREE(_p) free(_p)
+#endif
+
+#ifndef RING_MEMMOVE
+    #include <string.h>
+    #define RING_MEMMOVE(_dst, _src, _s) memmove((_dst), (_src), (_s))
 #endif
 
 #define ring_t(_T) struct { _T *data; size_t allocated, size, tail; }
 #define ring_init(_r) do { (_r).data = 0; (_r).allocated = (_r).size = (_r).tail = 0; } while (0)
-#define ring_get(_r) ((_r).data[(_r).tail])
+#define ring_peek(_r) ((_r).data[(_r).tail])
 #define ring_pop(_r) do { (_r).size--; (_r).tail = ((_r).tail + 1) % (_r).allocated; } while (0)
-#define ring_free(_r) do { free((_r).data); ring_init(_r); } while (0)
+#define ring_free(_r) do { RING_FREE((_r).data); ring_init(_r); } while (0)
 #define ring_push_noalloc(_r, _v) do { \
         (_r).data[((_r).tail + (_r).size) % (_r).allocated] = (_v); \
         (_r).size++; \
     } while (0);
 #define ring_push(_r, _v) do { \
         if ((_r).size + 1 > (_r).allocated) { \
-            (_r).data = realloc((_r).data, sizeof(*(_r).data) * (((_r).allocated << 1) + 1)); \
+            (_r).data = RING_REALLOC((_r).data, sizeof(*(_r).data) * (((_r).allocated << 1) + 1)); \
             if ((_r).tail + (_r).size > (_r).allocated) { \
-                memmove( \
+                RING_MEMMOVE( \
                     (_r).data + (((_r).allocated << 1) + 1 - ((_r).allocated - (_r).tail)), \
                     (_r).data + (_r).tail, \
                     sizeof(*(_r).data) * ((_r).allocated - (_r).tail) \
                 ); \
+                (_r).tail = (((_r).allocated << 1) + 1 - ((_r).allocated - (_r).tail)); \
             } \
             (_r).allocated = ((_r).allocated << 1) + 1; \
         } \
         ring_push_noalloc((_r), (_v)); \
     } while (0)
 ```
+
+One thing I should take as a lesson is to write down the algorithm when I get even if it feels trivial or dumb. Especially when I get stuck on a bug that happens randomly.
