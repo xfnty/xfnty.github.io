@@ -34,3 +34,10 @@ void memory_unlock(handle_t h);
 ```
 
 todo: heap walk, defrag to threshold
+
+parts:
+- array of pointers to blocks
+- multiple blocks of memory each having
+  - pool of allocated regions (generation, offset, size, used & locked bits)
+
+Handle should be an index into region pool and a block it belongs to.
