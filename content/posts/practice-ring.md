@@ -8,7 +8,7 @@ I must admit I'm pretty bad at programming. I have a habit of wasting a lot of t
 code before doing any design.
 
 In this series of short posts I'd like to work on my shortcomings by making tiny projects while focusing on
-being more precise and efficient.
+being more intentional, precise and efficient.
 
 ---
 
@@ -17,10 +17,6 @@ for window messages in a small game library I was writing at the time. I wanted 
 
 ```c
 #define ring_t(_T) struct { _T *data; size_t n, m, tail; }
-#define ring_init(_r) do { \
-        (_r).data = 0; \
-        (_r).n = (_r).n = (_r).tail = 0; \
-    } while (0)
 #define ring_push(_r, _v) /* ... */
 #define ring_get(_r) ((_r).data[(_r).tail])
 #define ring_pop(_r) do { \
@@ -30,15 +26,14 @@ for window messages in a small game library I was writing at the time. I wanted 
     } while (0)
 
 ring_t(int) ints;
-ring_push(ints, 1);
 int one = ring_get(ints);
 ring_pop(ints);
 ```
 
-I needed it to be pretty simple and able to work inside fixed memory block as well as the heap.
+I wanted it to be pretty simple and able to work inside fixed memory block as well as the heap.
 
 The template format fits the first condition pretty well and the second can be satisfied by adding
-`push_noalloc()`. Also there wasn't a need for adding or popping more than one element at a time or for it to be thread-safe.
+`push_noalloc()`. Also there wasn't a need for adding or removing more than one element at a time or for it to be thread-safe.
 
 This is the complete interface:
 ```c
@@ -105,7 +100,7 @@ This is what I ended up with:
     } while (0)
 ```
 
-At some point I forgot to set `tail` after `memmove` which resulted in `peek()` *sometimes* returning garbage. I spend too much time on this issue when I simply had to write down the algorithm and compare it to what I've already wrote.
+At some point I forgot to update `tail` after `memmove` which resulted in `peek()` *sometimes* returning garbage. I spend too much time on this issue when I simply had to write down the algorithm and compare it to what I've already wrote.
 
 So one thing I should certainly take as a lesson is to make a checklist (steps of the algorithm) even if it feels trivial or dumb. Especially when I get stuck on a bug that happens randomly.
 
