@@ -18,9 +18,9 @@
     <circle cx="200" cy="110" r="4" stroke-width="3" stroke="#ff752b" fill="#212121" />
     <circle cx="680" cy="110" r="4" stroke-width="3" stroke="#ff752b" fill="white" />
     <g font-family="Orbitron, monospace" font-weight="bold">
-        <text x="375" y="22.5" text-anchor="middle" font-size="20" fill="#fff">SERVER STATUS</text>
+        <text x="375" y="22.5" text-anchor="middle" font-size="20" fill="#fff">SERVER STATISTICS</text>
         <text x="45" y="55" font-size="14" fill="#fff">PLAYERS <tspan fill="#ff752b">0</tspan></text>
-        <text x="200" y="55" font-size="14" fill="#fff">PLAYER STATISTICS</text>
+        <text x="200" y="55" font-size="14" fill="#fff">PLAYER COUNT</text>
         <text x="37" y="75" font-size="14" fill="#fff">UPTIME <tspan fill="#ff752b">15m3s</tspan></text>
         <text x="700" y="70" font-size="12" fill="#fff">22</text>
         <text x="700" y="114" font-size="12" fill="#fff">0</text>
