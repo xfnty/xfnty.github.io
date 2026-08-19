@@ -4,14 +4,6 @@ description = 'Notes on trying to implement different things and learning to be 
 date = '2026-06-15T21:10:10+04:00'
 +++
 
-I must admit I'm pretty bad at programming. I have a habit of wasting a lot of time and jumping straight into
-code before doing any design.
-
-In this series of short posts I'd like to work on my shortcomings by making tiny projects while focusing on
-being more intentional, precise and efficient.
-
----
-
 One thing I had a struggle with recently was ring queue. It's purpose was to allow me to not use callbacks
 for window messages in a small game library I was writing at the time. I wanted it to be a C "template" type:
 
